@@ -1,5 +1,7 @@
-using Relationships.Data;
-using Microsoft.EntityFrameworkCore;
+global using Relationships.Data;
+global using Relationships.Dtos;
+global using Relationships.Models;
+global using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
