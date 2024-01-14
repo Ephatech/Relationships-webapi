@@ -22,16 +22,7 @@ namespace Relationships.Controllers
 
         // Question related functions
 
-        [HttpGet("questions/{userId}")]
-        public async Task<ActionResult<List<Question>>> GetQuestion(int userId){
-            var questions = await _context.Questions
-            .Where(q => q.UserId == userId)
-            .ToListAsync();
-
-            return questions;
-        }
-
-        [HttpPost("questions")]
+        [HttpPost("createQuestion")]
         public async Task<ActionResult<List<Question>>> CreateQuestion(CreateQuestionDto request){
             var user = await _context.Users.FindAsync(request.UserId);
             if(user == null){
@@ -47,40 +38,33 @@ namespace Relationships.Controllers
             _context.Questions.Add(newQuestion);
             await _context.SaveChangesAsync();
 
-            return await GetQuestion(newQuestion.UserId);
+            return await GetQuestionByUserId(newQuestion.UserId);
         }
 
-        // Answer related functions
-
-        [HttpGet("answers/{userId}")]
-        public async Task<ActionResult<List<Answer>>> GetAnswer(int userId){
-            var answers = await _context.Answers
-            .Where(a => a.UserId == userId)
+        [HttpGet("getByUserId/{userId}")]
+        public async Task<ActionResult<List<Question>>> GetQuestionByUserId(int userId){
+            var questions = await _context.Questions
+            .Where(q => q.UserId == userId)
             .ToListAsync();
 
-            return answers;
+            return questions;
         }
 
+        [HttpGet("getByTitle/{title}")]
+        public async Task<ActionResult<List<Question>>> GetQuestionByTitle(string title){
+            var questions = await _context.Questions
+            .Where(q => q.Title == title)
+            .ToListAsync();
 
-         [HttpPost("answers")]
-        public async Task<ActionResult<List<Answer>>> CreateAnswer(CreateAnswerDto request){
-            var user = await _context.Users.FindAsync(request.UserId);
-            var question = await _context.Questions.FindAsync(request.QuestionId);
-            if(user == null || question == null){
-                return NotFound();
-            }
+            return questions;
+        }
 
-            var newAnswer = new Answer{
-                Title = request.Title,
-                Content = request.Content,
-                UserId = request.UserId,
-                QuestionId = request.QuestionId
-            };
+        [HttpGet("getAll")]
+        public async Task<ActionResult<List<Question>>> GetAllQuestions(){
+            var questions = await _context.Questions
+            .ToListAsync();
 
-            _context.Answers.Add(newAnswer);
-            await _context.SaveChangesAsync();
-
-            return await GetAnswer(newAnswer.UserId);
+            return questions;
         }
     }
 }
