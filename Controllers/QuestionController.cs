@@ -13,58 +13,93 @@ namespace Relationships.Controllers
     public class QuestionController : ControllerBase
     {
 
-        private readonly DataContext _context;
+        private readonly IQuestionServices _questionServices;
 
-        public QuestionController(DataContext context)
+        public QuestionController(IQuestionServices questionServices)
         {
-            _context = context;
+            _questionServices = questionServices;
         }
 
-        // Question related functions
-
         [HttpPost("createQuestion")]
-        public async Task<ActionResult<List<Question>>> CreateQuestion(CreateQuestionDto request){
-            var user = await _context.Users.FindAsync(request.UserId);
-            if(user == null){
-                return NotFound();
+        public async Task<ActionResult> CreateQuestion(CreateQuestionDto request){
+            try
+            {
+                return Ok(await _questionServices.CreateQuestion(request));
             }
-
-            var newQuestion = new Question{
-                Title = request.Title,
-                Content = request.Content,
-                UserId = request.UserId
-            };
-
-            _context.Questions.Add(newQuestion);
-            await _context.SaveChangesAsync();
-
-            return await GetQuestionByUserId(newQuestion.UserId);
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
 
         [HttpGet("getByUserId/{userId}")]
         public async Task<ActionResult<List<Question>>> GetQuestionByUserId(int userId){
-            var questions = await _context.Questions
-            .Where(q => q.UserId == userId)
-            .ToListAsync();
+            try{
+                return Ok(await _questionServices.GetQuestionByUserId(userId));
+            }
+            catch(Exception ex){
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
 
-            return questions;
+        [HttpGet("getById/{id}")]
+        public async Task<ActionResult<List<Question>>> GetQuestionById(int id){
+            try{
+                return Ok(await _questionServices.GetQuestionById(id));
+            }
+            catch(Exception ex){
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
 
         [HttpGet("getByTitle/{title}")]
         public async Task<ActionResult<List<Question>>> GetQuestionByTitle(string title){
-            var questions = await _context.Questions
-            .Where(q => q.Title == title)
-            .ToListAsync();
-
-            return questions;
+            try{
+                return Ok(await _questionServices.GetQuestionByTitle(title));
+            }
+            catch(Exception ex){
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
 
         [HttpGet("getAll")]
         public async Task<ActionResult<List<Question>>> GetAllQuestions(){
-            var questions = await _context.Questions
-            .ToListAsync();
-
-            return questions;
+           try
+            {
+                return Ok(await _questionServices.GetAllQuestions());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
+
+        [HttpPut("updateQuestion/{questionId}")]
+        public async Task<ActionResult<List<Question>>> UpdateQuestion(int questionId, UpdateQuestionDto request)
+        {
+            try
+            {
+                return Ok(await _questionServices.UpdateQuestion(questionId, request));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+        [HttpDelete("deleteQuestion/{questionId}")]
+        public async Task<ActionResult<List<Question>>> DeleteQuestion(int questionId)
+        {
+            try
+            {
+                return Ok(await _questionServices.DeleteQuestion(questionId));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+
     }
 }

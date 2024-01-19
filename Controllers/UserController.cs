@@ -11,36 +11,85 @@ namespace Relationships.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-     private readonly DataContext _context;
+     private readonly IUserServices  _userServices;
 
-        public UserController(DataContext context)
+        public UserController(IUserServices userServices)
         {
-            _context = context;
+            _userServices = userServices;
         }
 
         [HttpGet("users/{userId}")]
-        public async Task<ActionResult<List<User>>> GetUser(int userId){
-            var users = await _context.Users
-            .Where(u => u.Id == userId)
-            .ToListAsync();
+        public async Task<ActionResult> GetUser(int userId){
+            try{
+                return Ok(await _userServices.GetUser(userId));
+            }
+            catch(Exception ex){
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
 
-            return users;
+        [HttpGet("getAll")]
+        public async Task<ActionResult> GetAllUsers(){
+            try
+            {
+                return Ok(await _userServices.GetAllUsers());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
 
         [HttpPost("addUser")]
-        public async Task<ActionResult<List<User>>> CreateUSer(CreateUserDto request){
+        public async Task<ActionResult> CreateUSer(CreateUserDto request){
 
-            var newUser = new User{
-                Username = request.Username
-            };
-
-            _context.Users.Add(newUser);
-            await _context.SaveChangesAsync();
-
-            return await GetUser(newUser.Id);
+            try
+            {
+                return Ok(await _userServices.CreateUSer(request));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
 
+        [HttpPut("updateUser/{userId}")]
+        public async Task<ActionResult> UpdateUser(int userId, CreateUserDto request)
+        {
+            try
+            {
+                return Ok(await _userServices.UpdateUser(userId, request));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
 
+        // [HttpDelete("deleteUsern/{userId}")]
+        // public async Task<ActionResult<List<User>>> DeleteUser(int userId)
+        // {
+        //     var user = await _context.Users.FindAsync(userId);
+        //     if (user == null)
+        //     {
+        //         return NotFound();
+        //     }
+
+        //     // Delete associated questions first
+        //     var questionsToDelete = _context.Questions
+        //     .Where(q => q.UserId == userId);
+        //     _context.Questions.RemoveRange(questionsToDelete);
+
+        //     // Delete associated answers first
+        //     var answersToDelete = _context.Answers
+        //     .Where(a => a.UserId == userId);
+        //     _context.Answers.RemoveRange(answersToDelete);
+
+        //     _context.Users.Remove(user);
+        //     await _context.SaveChangesAsync();
+
+        //     return await GetUser(user.Id);
+        // }
    
     }
 }
